@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefMatch - Find Your Recipe</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #fffaf3;
+            color: #2d2d2d;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff7043, #ff9f43);
+            color: white;
+            padding: 22px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #fff3cd;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: bold;
+        }
+
+        .hero {
+            padding: 75px 20px;
+            text-align: center;
+            background:
+                radial-gradient(circle at top right, #ffe0b2, transparent 35%),
+                linear-gradient(135deg, #fff8ed, #fffaf3);
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            color: #2d2d2d;
+            margin-bottom: 15px;
+        }
+
+        .hero h1 span {
+            color: #f4511e;
+        }
+
+        .hero p {
+            font-size: 19px;
+            color: #666;
+            max-width: 650px;
+            margin: auto;
+            line-height: 1.6;
+        }
+
+        .search-box {
+            max-width: 850px;
+            margin: 35px auto 0;
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+        }
+
+        .search-box label {
+            display: block;
+            text-align: left;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #ff7043;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .search-btn {
+            background: #f4511e;
+            color: white;
+            padding: 16px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .search-btn:hover {
+            background: #d84315;
+        }
+
+        .examples {
+            margin-top: 12px;
+            text-align: left;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .results-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .results-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title h2 {
+            font-size: 32px;
+            color: #333;
+        }
+
+        .results-title p {
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 7px 25px rgba(0,0,0,0.07);
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        .recipe-image {
+            height: 170px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            background: #fff0df;
+        }
+
+        .recipe-content {
+            padding: 22px;
+        }
+
+        .recipe-content h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .recipe-description {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .ingredients-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .ingredients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .ingredient {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .missing {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff4f2;
+            border-radius: 8px;
+            color: #d84315;
+            font-size: 13px;
+        }
+
+        .perfect {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .match {
+            margin-top: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #f4511e;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #777;
+        }
+
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .about {
+            background: #2d2d2d;
+            color: white;
+            padding: 55px 20px;
+            text-align: center;
+        }
+
+        .about h2 {
+            margin-bottom: 15px;
+            font-size: 30px;
+        }
+
+        .about p {
+            max-width: 700px;
+            margin: auto;
+            line-height: 1.7;
+            color: #ddd;
+        }
+
+        footer {
+            background: #1f1f1f;
+            color: #aaa;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 650px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            nav a {
+                margin: 0 8px;
+                font-size: 14px;
+            }
+
+            .hero h1 {
+                font-size: 38px;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🍳 Chef<span>Match</span></div>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#recipes">Recipes</a>
+        <a href="#about">About</a>
+    </nav>
+</header>
+
+<section class="hero" id="home">
+
+    <h1>Cook with what you <span>have.</span></h1>
+
+    <p>
+        Enter the ingredients available in your kitchen and ChefMatch
+        will find delicious recipes you can make.
+    </p>
+
+    <div class="search-box">
+
+        <label for="ingredientInput">
+            🥕 What ingredients do you have?
+        </label>
+
+        <div class="input-row">
+
+            <input
+                type="text"
+                id="ingredientInput"
+                placeholder="Example: chicken, tomato, rice, onion"
+            >
+
+            <button class="search-btn" onclick="findRecipes()">
+                Find Recipes
+            </button>
+
+        </div>
+
+        <div class="examples">
+            Try: chicken, tomato, rice, pasta, egg, potato
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="results-section" id="recipes">
+
+    <div class="results-title">
+        <h2 id="resultTitle">Popular Recipes</h2>
+        <p id="resultSubtitle">
+            Start by entering the ingredients you have in your kitchen.
+        </p>
+    </div>
+
+    <div id="recipeGrid" class="recipe-grid"></div>
+
+</section>
+
+
+<section class="about" id="about">
+
+    <h2>About ChefMatch</h2>
+
+    <p>
+        ChefMatch is a simple recipe recommendation website created for
+        people who want to cook with the ingredients they already have.
+        The website contains 50 recipes and compares the ingredients
+        entered by the user with the recipe database.
+    </p>
+
+</section>
+
+
+<footer>
+    ChefMatch © 2026 | Created for Gastronomy & Culinary Arts
+</footer>
+
+
+<script>
+
+const recipes = [
+
+{
+    name: "Spaghetti Bolognese",
+    emoji: "🍝",
+    description: "Classic Italian pasta with a rich tomato and beef sauce.",
+    ingredients: ["spaghetti", "beef", "tomato", "onion", "garlic", "olive oil"]
+},
+
+{
+    name: "Chicken Pasta",
+    emoji: "🍝",
+    description: "Creamy and delicious pasta with tender chicken.",
+    ingredients: ["pasta", "chicken", "cream", "garlic", "parmesan", "olive oil"]
+},
+
+{
+    name: "Chicken Rice",
+    emoji: "🍗",
+    description: "Simple and filling chicken served with rice.",
+    ingredients: ["chicken", "rice", "onion", "garlic", "olive oil", "salt"]
+},
+
+{
+    name: "Chicken Salad",
+    emoji: "🥗",
+    description: "Fresh salad with grilled chicken and vegetables.",
+    ingredients: ["chicken", "lettuce", "tomato", "cucumber", "olive oil", "lemon"]
+},
+
+{
+    name: "Greek Salad",
+    emoji: "🥗",
+    description: "Fresh Mediterranean salad with feta cheese.",
+    ingredients: ["tomato", "cucumber", "feta", "olive oil", "onion", "olives"]
+},
+
+{
+    name: "Caesar Salad",
+    emoji: "🥬",
+    description: "Classic Caesar salad with chicken and creamy dressing.",
+    ingredients: ["lettuce", "chicken", "parmesan", "bread", "lemon", "mayonnaise"]
+},
+
+{
+    name: "Omelette",
+    emoji: "🍳",
+    description: "Quick breakfast made with eggs and vegetables.",
+    ingredients: ["egg", "onion", "tomato", "cheese", "olive oil", "salt"]
+},
+
+{
+    name: "Scrambled Eggs",
+    emoji: "🍳",
+    description: "Soft and creamy scrambled eggs.",
+    ingredients: ["egg", "butter", "milk", "salt", "pepper"]
+},
+
+{
+    name: "Shakshuka",
+    emoji: "🍅",
+    description: "Eggs cooked in a spicy tomato sauce.",
+    ingredients: ["egg", "tomato", "onion", "pepper", "garlic", "olive oil"]
+},
+
+{
+    name: "French Toast",
+    emoji: "🍞",
+    description: "Sweet breakfast made with bread, eggs and milk.",
+    ingredients: ["bread", "egg", "milk", "sugar", "butter", "cinnamon"]
+},
+
+{
+    name: "Pancakes",
+    emoji: "🥞",
+    description: "Fluffy homemade pancakes perfect for breakfast.",
+    ingredients: ["flour", "egg", "milk", "sugar", "butter", "baking powder"]
+},
+
+{
+    name: "French Fries",
+    emoji: "🍟",
+    description: "Crispy golden potatoes.",
+    ingredients: ["potato", "oil", "salt"]
+},
+
+{
+    name: "Mashed Potatoes",
+    emoji: "🥔",
+    description: "Creamy mashed potatoes with butter and milk.",
+    ingredients: ["potato", "butter", "milk", "salt", "pepper"]
+},
+
+{
+    name: "Potato Salad",
+    emoji: "🥔",
+    description: "Fresh and creamy potato salad.",
+    ingredients: ["potato", "mayonnaise", "onion", "parsley", "lemon"]
+},
+
+{
+    name: "Beef Burger",
+    emoji: "🍔",
+    description: "Juicy homemade beef burger.",
+    ingredients: ["beef", "burger bun", "lettuce", "tomato", "onion", "cheese"]
+},
+
+{
+    name: "Chicken Burger",
+    emoji: "🍔",
+    description: "Crispy chicken burger with fresh vegetables.",
+    ingredients: ["chicken", "burger bun", "lettuce", "tomato", "mayonnaise"]
+},
+
+{
+    name: "Margherita Pizza",
+    emoji: "🍕",
+    description: "Simple Italian pizza with tomato, mozzarella and basil.",
+    ingredients: ["flour", "tomato", "mozzarella", "basil", "olive oil"]
+},
+
+{
+    name: "Pepperoni Pizza",
+    emoji: "🍕",
+    description: "Classic pizza topped with pepperoni and cheese.",
+    ingredients: ["flour", "tomato", "mozzarella", "pepperoni", "olive oil"]
+},
+
+{
+    name: "Vegetable Pizza",
+    emoji: "🍕",
+    description: "Colorful pizza loaded with fresh vegetables.",
+    ingredients: ["flour", "tomato", "cheese", "pepper", "onion", "mushroom"]
+},
+
+{
+    name: "Tuna Sandwich",
+    emoji: "🥪",
+    description: "Quick sandwich with tuna and fresh vegetables.",
+    ingredients: ["bread", "tuna", "mayonnaise", "lettuce", "tomato"]
+},
+
+{
+    name: "Club Sandwich",
+    emoji: "🥪",
+    description: "Classic layered sandwich with chicken and vegetables.",
+    ingredients: ["bread", "chicken", "lettuce", "tomato", "mayonnaise", "cheese"]
+},
+
+{
+    name: "Grilled Cheese",
+    emoji: "🧀",
+    description: "Crispy bread with melted cheese.",
+    ingredients: ["bread", "cheese", "butter"]
+},
+
+{
+    name: "Tomato Soup",
+    emoji: "🍅",
+    description: "Warm and comforting homemade tomato soup.",
+    ingredients: ["tomato", "onion", "garlic", "cream", "olive oil"]
+},
+
+{
+    name: "Chicken Soup",
+    emoji: "🍲",
+    description: "Comforting chicken soup with vegetables.",
+    ingredients: ["chicken", "carrot", "onion", "potato", "garlic", "water"]
+},
+
+{
+    name: "Lentil Soup",
+    emoji: "🍲",
+    description: "Healthy and hearty Turkish-style lentil soup.",
+    ingredients: ["lentil", "onion", "carrot", "potato", "olive oil", "water"]
+},
+
+{
+    name: "Mushroom Soup",
+    emoji: "🍄",
+    description: "Creamy mushroom soup.",
+    ingredients: ["mushroom", "cream", "onion", "garlic", "butter"]
+},
+
+{
+    name: "Vegetable Soup",
+    emoji: "🥕",
+    description: "Healthy soup made with mixed vegetables.",
+    ingredients: ["carrot", "potato", "onion", "tomato", "zucchini", "water"]
+},
+
+{
+    name: "Beef Stir Fry",
+    emoji: "🥩",
+    description: "Quick beef stir fry with colorful vegetables.",
+    ingredients: ["beef", "pepper", "onion", "soy sauce", "garlic", "oil"]
+},
+
+{
+    name: "Chicken Stir Fry",
+    emoji: "🍗",
+    description: "Tender chicken with vegetables and soy sauce.",
+    ingredients: ["chicken", "pepper", "onion", "soy sauce", "garlic", "oil"]
+},
+
+{
+    name: "Fried Rice",
+    emoji: "🍚",
+    description: "Easy fried rice with eggs and vegetables.",
+    ingredients: ["rice", "egg", "carrot", "peas", "soy sauce", "onion"]
+},
+
+{
+    name: "Vegetable Rice",
+    emoji: "🍚",
+    description: "Simple rice cooked with fresh vegetables.",
+    ingredients: ["rice", "carrot", "peas", "onion", "pepper", "olive oil"]
+},
+
+{
+    name: "Risotto",
+    emoji: "🍚",
+    description: "Creamy Italian rice dish.",
+    ingredients: ["rice", "onion", "butter", "parmesan", "stock", "white wine"]
+},
+
+{
+    name: "Mac and Cheese",
+    emoji: "🧀",
+    description: "Creamy pasta with lots of melted cheese.",
+    ingredients: ["macaroni", "cheese", "milk", "butter", "flour"]
+},
+
+{
+    name: "Pesto Pasta",
+    emoji: "🌿",
+    description: "Fresh pasta with basil pesto.",
+    ingredients: ["pasta", "basil", "parmesan", "garlic", "olive oil", "pine nuts"]
+},
+
+{
+    name: "Aglio e Olio",
+    emoji: "🍝",
+    description: "Simple pasta with garlic and olive oil.",
+    ingredients: ["spaghetti", "garlic", "olive oil", "parsley", "chili"]
+},
+
+{
+    name: "Carbonara",
+    emoji: "🍝",
+    description: "Creamy Italian pasta with egg and cheese.",
+    ingredients: ["spaghetti", "egg", "parmesan", "bacon", "pepper"]
+},
+
+{
+    name: "Lasagna",
+    emoji: "🍝",
+    description: "Layered pasta with beef, tomato sauce and cheese.",
+    ingredients: ["lasagna sheets", "beef", "tomato", "onion", "cheese", "bechamel"]
+},
+
+{
+    name: "Tacos",
+    emoji: "🌮",
+    description: "Mexican-style tacos with beef and vegetables.",
+    ingredients: ["tortilla", "beef", "tomato", "lettuce", "onion", "cheese"]
+},
+
+{
+    name: "Chicken Wrap",
+    emoji: "🌯",
+    description: "Easy chicken wrap with fresh vegetables.",
+    ingredients: ["tortilla", "chicken", "lettuce", "tomato", "yogurt"]
+},
+
+{
+    name: "Quesadilla",
+    emoji: "🌮",
+    description: "Crispy tortilla filled with melted cheese.",
+    ingredients: ["tortilla", "cheese", "chicken", "pepper", "onion"]
+},
+
+{
+    name: "Hummus",
+    emoji: "🫘",
+    description: "Creamy chickpea dip with tahini and lemon.",
+    ingredients: ["chickpea", "tahini", "lemon", "garlic", "olive oil"]
+},
+
+{
+    name: "Guacamole",
+    emoji: "🥑",
+    description: "Fresh avocado dip with tomato and lime.",
+    ingredients: ["avocado", "tomato", "onion", "lime", "salt"]
+},
+
+{
+    name: "Bruschetta",
+    emoji: "🍅",
+    description: "Toasted bread with tomato, basil and olive oil.",
+    ingredients: ["bread", "tomato", "basil", "garlic", "olive oil"]
+},
+
+{
+    name: "Caprese Salad",
+    emoji: "🍅",
+    description: "Italian salad with tomato, mozzarella and basil.",
+    ingredients: ["tomato", "mozzarella", "basil", "olive oil"]
+},
+
+{
+    name: "Tzatziki",
+    emoji: "🥒",
+    description: "Refreshing yogurt and cucumber dip.",
+    ingredients: ["yogurt", "cucumber", "garlic", "olive oil", "lemon"]
+},
+
+{
+    name: "Avocado Toast",
+    emoji: "🥑",
+    description: "Simple toast topped with creamy avocado.",
+    ingredients: ["bread", "avocado", "lemon", "olive oil", "salt"]
+},
+
+{
+    name: "Banana Smoothie",
+    emoji: "🍌",
+    description: "Creamy and refreshing banana smoothie.",
+    ingredients: ["banana", "milk", "honey", "yogurt"]
+},
+
+{
+    name: "Berry Smoothie",
+    emoji: "🫐",
+    description: "Fresh smoothie made with berries and yogurt.",
+    ingredients: ["strawberry", "blueberry", "banana", "milk", "yogurt"]
+},
+
+{
+    name: "Chocolate Mug Cake",
+    emoji: "🍫",
+    description: "Quick chocolate cake prepared in a mug.",
+    ingredients: ["flour", "cocoa", "sugar", "milk", "egg", "butter"]
+},
+
+{
+    name: "Apple Crumble",
+    emoji: "🍎",
+    description: "Warm apples baked with a crispy crumble topping.",
+    ingredients: ["apple", "flour", "sugar", "butter", "cinnamon"]
+},
+
+{
+    name: "Rice Pudding",
+    emoji: "🍚",
+    description: "Creamy traditional rice pudding.",
+    ingredients: ["rice", "milk", "sugar", "vanilla"]
+},
+
+{
+    name: "Chocolate Brownie",
+    emoji: "🍫",
+    description: "Rich and fudgy homemade chocolate brownie.",
+    ingredients: ["flour", "cocoa", "sugar", "egg", "butter", "chocolate"]
+},
+
+{
+    name: "Greek Yogurt Bowl",
+    emoji: "🥣",
+    description: "Healthy breakfast bowl with fruit and honey.",
+    ingredients: ["yogurt", "banana", "strawberry", "honey", "nuts"]
+},
+
+{
+    name: "Fruit Salad",
+    emoji: "🍓",
+    description: "Fresh mixed fruit salad.",
+    ingredients: ["apple", "banana", "orange", "strawberry", "lemon"]
+}
+
+];
+
+
+function normalize(text) {
+    return text
+        .toLowerCase()
+        .trim()
+        .replace(/[.,!?]/g, "");
+}
+
+
+function findRecipes() {
+
+    const input = document.getElementById("ingredientInput").value;
+
+    if (!input.trim()) {
+        showPopularRecipes();
+        return;
+    }
+
+    const userIngredients = input
+        .split(",")
+        .map(item => normalize(item))
+        .filter(item => item.length > 0);
+
+    const results = recipes
+        .map(recipe => {
+
+            const available = recipe.ingredients.filter(
+                ingredient => userIngredients.includes(normalize(ingredient))
+            );
+
+            const missing = recipe.ingredients.filter(
+                ingredient => !userIngredients.includes(normalize(ingredient))
+            );
+
+            const percentage = Math.round(
+                (available.length / recipe.ingredients.length) * 100
+            );
+
+            return {
+                ...recipe,
+                available,
+                missing,
+                percentage
+            };
+
+        })
+        .filter(recipe => recipe.available.length > 0)
+        .sort((a, b) => b.percentage - a.percentage);
+
+    displayRecipes(results);
+
+    document.getElementById("resultTitle").textContent =
+        results.length + " Recipe(s) Found";
+
+    document.getElementById("resultSubtitle").textContent =
+        "Recipes are ranked according to the ingredients you have.";
+}
+
+
+function displayRecipes(recipeList) {
+
+    const grid = document.getElementById("recipeGrid");
+
+    grid.innerHTML = "";
+
+    if (recipeList.length === 0) {
+
+        grid.innerHTML = `
+            <div class="empty" style="grid-column: 1/-1;">
+                <div class="empty-icon">🍽️</div>
+                <h2>No matching recipes found</h2>
+                <p>Try adding more ingredients to your kitchen list.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    recipeList.forEach(recipe => {
+
+        const ingredientsHTML = recipe.ingredients
+            .map(ingredient =>
+                `<span class="ingredient">${ingredient}</span>`
+            )
+            .join("");
+
+        let statusHTML = "";
+
+        if (recipe.missing.length === 0) {
+
+            statusHTML = `
+                <div class="perfect">
+                    ✓ You have all the ingredients!
+                </div>
+            `;
+
+        } else {
+
+            statusHTML = `
+                <div class="missing">
+                    <strong>Missing:</strong>
+                    ${recipe.missing.join(", ")}
+                </div>
+            `;
+
+        }
+
+        grid.innerHTML += `
+
+            <div class="recipe-card">
+
+                <div class="recipe-image">
+                    ${recipe.emoji}
+                </div>
+
+                <div class="recipe-content">
+
+                    <h3>${recipe.name}</h3>
+
+                    <p class="recipe-description">
+                        ${recipe.description}
+                    </p>
+
+                    <div class="ingredients-title">
+                        Ingredients
+                    </div>
+
+                    <div class="ingredients">
+                        ${ingredientsHTML}
+                    </div>
+
+                    <div class="match">
+                        ${recipe.percentage}% ingredient match
+                    </div>
+
+                    ${statusHTML}
+
+                </div>
+
+            </div>
+
+        `;
+    });
+}
+
+
+function showPopularRecipes() {
+
+    const popular = recipes.slice(0, 9).map(recipe => ({
+        ...recipe,
+        available: [],
+        missing: [],
+        percentage: 0
+    }));
+
+    displayRecipes(popular);
+
+    document.getElementById("resultTitle").textContent =
+        "Popular Recipes";
+
+    document.getElementById("resultSubtitle").textContent =
+        "Enter your ingredients above to find the best matches.";
+}
+
+
+document.getElementById("ingredientInput").addEventListener(
+    "keypress",
+    function(event) {
+
+        if (event.key === "Enter") {
+            findRecipes();
+        }
+
+    }
+);
+
+
+showPopularRecipes();
+
+</script>
+
+</body>
+</html>
